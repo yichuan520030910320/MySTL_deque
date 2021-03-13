@@ -40,7 +40,7 @@ namespace sjtu {
 //
             ~block() {
                 for (int i = 0; i < currentsize; ++i) {
-                    cout<<i<<endl;
+                    //cout<<i<<endl;
                     delete element[i];
                 }
                 delete[] element;
@@ -247,6 +247,7 @@ namespace sjtu {
             // if these two iterators points to different vectors, throw invaild_iterator.
             int operator-(const iterator &rhs) const {//todo is draft
                 if (headdequeu != rhs.headdequeu) {
+                    //cout<<"fffffffffffuuuuuuck"<<endl;
                     throw invalid_iterator();
                 }
                 if (headblock == rhs.headblock) {
@@ -266,19 +267,21 @@ namespace sjtu {
                         dis += p->currentsize;
                         p = p->nxt;
                     }
-                    if (p->nxt == nullptr) {
-                        p = rhs.headblock;
-                        dis = p->currentsize - rhs.pos;
+                    if (p == nullptr) {
+                        p = headblock;
+                        dis = p->currentsize - pos;
                         while (p != nullptr) {
                             p = p->nxt;
-                            if (p == headblock) {
+                            if (p == rhs.headblock) {
                                 dis += pos - rhs.pos;
                                 break;
                             }
                             dis += p->currentsize;
                         }
                     } else return dis;
-                    if (p == nullptr) { throw invalid_iterator(); }
+                    if (p == nullptr) {
+                        //cout<<"ffffffffffffffffffffffuckk"<<endl;
+                        throw invalid_iterator(); }
                     else {
                         return -(dis);
                     }
@@ -713,7 +716,9 @@ namespace sjtu {
          */
         iterator insert(iterator pos, const T &value) {
 
-            if (this!=pos.headdequeu) throw invalid_iterator();
+            if (this!=pos.headdequeu) {
+                //cout<<"&&&&&&"<<endl;
+                throw invalid_iterator(); }
 //            if (pos.headblock->currentsize>SPLITNUM){split(pos.headblock);
 //            pos=
 //            }
@@ -763,6 +768,7 @@ namespace sjtu {
             temp.headdequeu=this;
             temp.headblock=pos.headblock;
             temp.pos=pos.pos;
+            return  temp;
         }
 
         /**
