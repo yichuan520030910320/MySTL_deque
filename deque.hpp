@@ -721,7 +721,7 @@ namespace sjtu {
                 throw invalid_iterator(); }
 //            if (pos.headblock->currentsize>SPLITNUM){split(pos.headblock);
 //            pos=
-//            }
+//  //          }
             if (pos.headblock->pre!= nullptr&&pos.pos==0){
                 pos.pos=pos.headblock->pre->currentsize;
                 pos.headblock=pos.headblock->pre;
