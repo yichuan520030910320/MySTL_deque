@@ -40,7 +40,7 @@ namespace sjtu {
 //
             ~block() {
                 for (int i = 0; i < currentsize; ++i) {
-                    //cout<<i<<endl;
+                    cout<<i<<endl;
                     delete element[i];
                 }
                 delete[] element;
@@ -212,11 +212,8 @@ namespace sjtu {
                     addnum += p->currentsize;
                     temp.headblock = p;
                     temp.pos = addnum;
-                }//cout<<++cnt<<endl;
-                //delete p;
-                //  cout<<temp.headdequeu->num<<"%%%%&&&$$$"<<endl;
+                }
                 return temp;
-                //TODO
             }
 
             iterator operator-(const int &n) const {
@@ -259,9 +256,6 @@ namespace sjtu {
                     block *p = rhs.headblock->nxt;
                     dis = rhs.headblock->currentsize - rhs.pos;
                     while (p != nullptr) {
-
-                        // cout<<p<<"   "<<headblock<<endl;
-                        //cout<<p->currentsize<<"   "<<headblock->currentsize<<"^^^^"<<endl;
                         if (p == headblock) {
                             //cout<<"****"<<endl;
                             dis += pos - rhs.pos;
@@ -490,11 +484,11 @@ namespace sjtu {
             block *q;
             head->nxt = tail;
             tail->pre = head;
-            while (p != tail)
+            while (p->nxt)
             {
-                q = p;
-                delete q;
-                p = p->nxt;
+               q=p->nxt;
+               delete p;
+               p=q;
             }
             num = 0;
             delete head;
