@@ -40,6 +40,7 @@ namespace sjtu {
 //
             ~block() {
                 for (int i = 0; i < currentsize; ++i) {
+                   // cout<<currentsize<<"&&&&"<<endl;
                     //cout<<i<<endl;
                     delete element[i];
                 }
@@ -50,18 +51,37 @@ namespace sjtu {
             void add(T key, int location) {//插入后变成第location位
                 // cout<<key<<"&&&&&&&&&"<<location<<"***"<<currentsize<<endl;
                 //key=1000000;
-                for (int i = currentsize; i > location ; --i) {
+//                for (int i = 0; i <currentsize ; ++i) {
+//                    cout<<(element[i][0])<<"^^^^"<<endl;
+//                }
+                //array[size] = new T(array[size-1][0]);
+                if (currentsize==0){
+                    element[0]=new T(key);
+                    currentsize++;
+                    return;
+                }
+               // cout<<location<<"****"<<endl;
+                element[currentsize] =new T(element[currentsize-1][0]);
+                for (int i = currentsize-1; i > location ; --i) {
+                    //element[i][0] = element[i - 1][0];
                     element[i] = element[i - 1];
                 }
+                //element[location][0] = key;
                 element[location] = new T(key);
                 //  cout<<location<<""  ""<<endl;
                 currentsize++;
+
+//                for (int i = 0; i <currentsize ; ++i) {
+//                    cout<<(element[i][0])<<"^^****^^"<<endl;
+//                }
+
             }
 
             void erase(int location) {//删除第location位
-                for (int i = location - 1; i < currentsize - 1; ++i) {
+                for (int i = location ; i < currentsize - 1; ++i) {
                     element[i] = element[i + 1];
                 }
+                element[currentsize-1]= nullptr;
                 currentsize--;
 
             }
@@ -207,7 +227,7 @@ namespace sjtu {
                 else if (p == headdequeu->tail) {
                     temp.pos=0;
                     temp.headblock=headdequeu->tail;
-                    //throw invalid_iterator();
+                    //throw invalid_iterator();//todo may have trouble
                 } else {
                     addnum += p->currentsize;
                     temp.headblock = p;
@@ -222,7 +242,6 @@ namespace sjtu {
                 int addnum = n;
                 if (pos - n >= 0) {
                     temp.pos -= n;
-
                 } else {
                     block *p = headblock;
                     int temppos = temp.pos;
@@ -233,7 +252,7 @@ namespace sjtu {
                         frontnum -= p->currentsize;
                     }
                     if (p == headdequeu->head) {
-                        throw invalid_iterator();
+                        //throw invalid_iterator();
                     } else {
                         frontnum += p->currentsize;
                         temp.pos = p->currentsize - frontnum;
@@ -568,7 +587,10 @@ namespace sjtu {
                 if (temppos <0) break;
                 p = p->nxt;
             }
-            if (p == tail) { throw index_out_of_bound(); }
+            if (p == tail) {
+
+               // throw index_out_of_bound();
+            }
             else {
                 temppos+=p->currentsize;
                 return *(p->element[temppos ]);
@@ -588,7 +610,7 @@ namespace sjtu {
             if (p == tail) { throw index_out_of_bound(); }
             else {
                 temppos+=p->currentsize;
-                return *(p->element[temppos ]);
+                return *(p->element[temppos]);
             }
         }
 
@@ -606,7 +628,9 @@ namespace sjtu {
                 p = p->nxt;
                 //cout<<"***"<<endl;
             }
-            if (p == tail) { throw index_out_of_bound(); }
+            if (p == tail) {
+                //throw index_out_of_bound();
+            }
             else {
                 temppos+=p->currentsize;
 
@@ -715,42 +739,95 @@ namespace sjtu {
          *     throw if the iterator is invalid or it point to a wrong place.
          */
         iterator insert(iterator pos, const T &value) {
-
             if (this!=pos.headdequeu) {
                 //cout<<"&&&&&&"<<endl;
                 throw invalid_iterator(); }
-//            if (pos.headblock->currentsize>SPLITNUM){split(pos.headblock);
-//            pos=
-//  //          }
-            if (pos.headblock->pre!= nullptr&&pos.pos==0){
-                pos.pos=pos.headblock->pre->currentsize;
-                pos.headblock=pos.headblock->pre;
-            }else if (head->nxt!= nullptr){
-                block*p=head->nxt;
-                pos.pos=pos-begin();
-                // cout<<pos.pos<<"    "<<value<<endl;
-                while (pos.pos-p->currentsize>=0&&p!=tail){
-                    pos.pos-=p->currentsize;
-                    p=p->nxt;
-                    //  cout<<pos.pos<<"************"<<endl;
-                }
-                if (p==head->nxt){
+            if (pos.headblock==tail){
+                if (pos.headblock->pre==head){
+                    block *p=new block;
+                    p->pre=head;
+                    head->nxt=p;
+                    p->nxt=tail;
+                    tail->pre=p;
+                    p->add(value,0);
+                    pos.pos=0;
                     pos.headblock=p;
-                }
-                else{
-                    if (p == tail) throw invalid_iterator();
-                    pos.headblock = p;
-
+                    num++;
+                    return pos;
+                } else{
+                    pos.headblock=pos.headblock->pre;
+                    pos.pos=pos.headblock->currentsize;
+                   // cout<<pos.pos<<"&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"<<endl;
                 }
             }
-            //cout<<value<<"777777"<<endl;
-            // cout<<pos.pos<<"   "<<pos.headblock->currentsize<<endl;
+//            for (int i = 0; i <pos.headblock->currentsize ; ++i) {
+//                cout<<*(pos.headblock->element[i])<<" &&&&& ";
+//            }
+//            cout<<endl;
             pos.headblock->add(value,pos.pos);
-            int num1=pos-begin();
-            if (pos.headblock->currentsize>SPLITNUM){split(pos.headblock);
-                pos=begin()+num1;
-            }
+//            for (int i = 0; i <pos.headblock->currentsize ; ++i) {
+//                cout<<*(pos.headblock->element[i])<<" &&&****&& ";
+//            }
+//            cout<<endl;
+
             num++;
+            if (pos.headblock->currentsize>SPLITNUM){
+                split(pos.headblock);
+                if (pos.pos>pos.headblock->currentsize-1){
+                    pos.headblock=pos.headblock->nxt;
+                    pos.pos=pos.pos-pos.headblock->currentsize;
+                }
+                //pos=begin()+num1;
+            }
+
+//            for (int i = 0; i <num ; ++i) {
+//                cout<< this.[i]<<endl;
+//            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+//            if (pos.headblock->pre!= nullptr&&pos.pos==0){
+//                pos.pos=pos.headblock->pre->currentsize;
+//                pos.headblock=pos.headblock->pre;
+//            }else if (head->nxt!= nullptr){
+//                block*p=head->nxt;
+//                pos.pos=pos-begin();
+//                // cout<<pos.pos<<"    "<<value<<endl;
+//                while (pos.pos-p->currentsize>=0&&p!=tail){
+//                    pos.pos-=p->currentsize;
+//                    p=p->nxt;
+//                    //  cout<<pos.pos<<"************"<<endl;
+//                }
+//                if (p==head->nxt){
+//                    pos.headblock=p;
+//                }
+//                else{
+//                    if (p == tail) throw invalid_iterator();
+//                    pos.headblock = p;
+//
+//                }
+//            }
+//            //cout<<value<<"777777"<<endl;
+//            // cout<<pos.pos<<"   "<<pos.headblock->currentsize<<endl;
+//            pos.headblock->add(value,pos.pos);
+//            int num1=pos-begin();
+//            if (pos.headblock->currentsize>SPLITNUM){split(pos.headblock);
+//                pos=begin()+num1;
+//            }
+//            num++;
             // pos.headdequeu->debug();
             return pos;
         }
@@ -859,7 +936,7 @@ namespace sjtu {
                 if (p->currentsize != 0) break;
                 p = p->nxt;
             }
-            p->erase(1);
+            p->erase(0);
             num--;
         }
     };

@@ -3,7 +3,8 @@ project(untitled)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(untitled main.cpp
+add_executable(untitled
+        2.cpp
         utility.hpp
         deque.hpp
         exceptions.hpp
