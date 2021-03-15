@@ -81,7 +81,8 @@ namespace sjtu {
                 for (int i = location ; i < currentsize - 1; ++i) {
                     element[i] = element[i + 1];
                 }
-                element[currentsize-1]= nullptr;
+                //delete element[currentsize-1];
+               element[currentsize-1]= nullptr;
                 currentsize--;
 
             }
