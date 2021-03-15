@@ -48,7 +48,7 @@ namespace sjtu {
                 currentsize=0;
             };
 
-            void add(T key, int location) {//插入后变成第location位
+            void add(const T &key, int location) {//插入后变成第location位
                 // cout<<key<<"&&&&&&&&&"<<location<<"***"<<currentsize<<endl;
                 //key=1000000;
 //                for (int i = 0; i <currentsize ; ++i) {
@@ -61,7 +61,7 @@ namespace sjtu {
                     return;
                 }
                // cout<<location<<"****"<<endl;
-                element[currentsize] =new T(element[currentsize-1][0]);
+                element[currentsize] =element[currentsize-1];
                 for (int i = currentsize-1; i > location ; --i) {
                     //element[i][0] = element[i - 1][0];
                     element[i] = element[i - 1];
@@ -201,6 +201,11 @@ namespace sjtu {
              */
             iterator operator+(const int &n) const {
                 // cout<<n<<"&&&"<<endl;
+                if (n<0) {
+                    iterator ans(*this);
+                    ans=ans-(-n);
+                    return ans;
+                }
                 iterator temp(*this);
                 int nownum = headblock->currentsize;
                 // cout<<nownum<<"   "<<temp.pos<<"  "
@@ -237,6 +242,11 @@ namespace sjtu {
             }
 
             iterator operator-(const int &n) const {
+                if (n<0) {
+                    iterator ans(*this);
+                    ans=ans+(-n);
+                    return ans;
+                }
                 iterator temp(*this);
                 int nownum = headblock->currentsize;
                 int addnum = n;
@@ -279,7 +289,7 @@ namespace sjtu {
                     while (p != nullptr) {
                         if (p == headblock) {
                             //cout<<"****"<<endl;
-                            dis += pos - rhs.pos;
+                            dis += pos ;
                             //cout<<dis<<"&&&"<<endl;
                             break;//todo
 
@@ -288,15 +298,15 @@ namespace sjtu {
                         p = p->nxt;
                     }
                     if (p == nullptr) {
-                        p = headblock;
+                        p = headblock->nxt;
                         dis = p->currentsize - pos;
                         while (p != nullptr) {
-                            p = p->nxt;
+
                             if (p == rhs.headblock) {
-                                dis += pos - rhs.pos;
+                                dis += rhs.pos ;
                                 break;
                             }
-                            dis += p->currentsize;
+                            dis += p->currentsize;p = p->nxt;
                         }
                     } else return dis;
                     if (p == nullptr) {
@@ -841,11 +851,12 @@ namespace sjtu {
          */
         iterator erase(iterator pos) {
             if (pos.headdequeu!= this||pos.headblock==tail||pos.headblock==head) throw invalid_iterator();
-            pos.headblock->erase(pos.pos+1);
+            pos.headblock->erase(pos.pos);
             iterator temp;
             temp.headdequeu=this;
             temp.headblock=pos.headblock;
             temp.pos=pos.pos;
+            num--;
             return  temp;
         }
 
