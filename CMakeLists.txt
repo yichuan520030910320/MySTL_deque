@@ -4,7 +4,7 @@ project(untitled)
 set(CMAKE_CXX_STANDARD 14)
 
 add_executable(untitled
-        2.cpp
+        code.cpp
         utility.hpp
         deque.hpp
         exceptions.hpp

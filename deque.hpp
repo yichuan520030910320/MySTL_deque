@@ -67,7 +67,7 @@ namespace sjtu {
                     element[i] = element[i - 1];
                 }
                 //element[location][0] = key;
-                element[location] = new T(key);
+               element[location] = new T(key);//todo
                 //  cout<<location<<""  ""<<endl;
                 currentsize++;
 
@@ -256,6 +256,7 @@ namespace sjtu {
                     } else {
                         frontnum += p->currentsize;
                         temp.pos = p->currentsize - frontnum;
+                        temp.headblock=p;
                     }
                 }
                 return temp;
