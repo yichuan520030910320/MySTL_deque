@@ -43,6 +43,7 @@ namespace sjtu {
                    // cout<<currentsize<<"&&&&"<<endl;
                     //cout<<i<<endl;
                     delete element[i];
+                    element[i]= nullptr;
                 }
                 delete[] element;
                 currentsize=0;
@@ -78,10 +79,10 @@ namespace sjtu {
             }
 
             void erase(int location) {//删除第location位
+                delete element[location];
                 for (int i = location ; i < currentsize - 1; ++i) {
                     element[i] = element[i + 1];
                 }
-                //delete element[currentsize-1];
                element[currentsize-1]= nullptr;
                 currentsize--;
 
@@ -91,6 +92,7 @@ namespace sjtu {
                 if (this == &other) return *this;
                 for (int i = 0; i < currentsize; ++i) {
                     delete element[i];
+                    element[i]= nullptr;
                 }
                 delete[] element;
                 pre = nullptr, nxt = nullptr;
@@ -121,6 +123,7 @@ namespace sjtu {
             temp2->nxt->pre = temp1;
             for (int i = 0; i < temp2->currentsize; ++i) {
                 delete temp2->element[i];
+                temp2->element[i]= nullptr;
             }
             delete[] temp2->element;
             temp1->currentsize += temp2->currentsize;
@@ -885,18 +888,18 @@ namespace sjtu {
             }
             //cout<<value<<"  ***"<<endl;
         }
-        void debug(){
-            cout<<"in debug........."<<endl;
-            block *p=head->nxt;
-            while (p!=tail){
-                for (int i = 0; i < p->currentsize; ++i) {
-                    cout<<*(p->element[i])<<endl;
-                }
-                cout<<"****************************"<<endl;
-                p=p->nxt;
-            }
-            cout<<" at the end of debug......."<<endl;
-        }
+//        void debug(){
+//            cout<<"in debug........."<<endl;
+//            block *p=head->nxt;
+//            while (p!=tail){
+//                for (int i = 0; i < p->currentsize; ++i) {
+//                    cout<<*(p->element[i])<<endl;
+//                }
+//                cout<<"****************************"<<endl;
+//                p=p->nxt;
+//            }
+//            cout<<" at the end of debug......."<<endl;
+//        }
 
         /**
          * removes the last element
@@ -909,6 +912,7 @@ namespace sjtu {
                 if (p->currentsize != 0) break;
                 p = p->pre;
             }
+            delete   p->element[p->currentsize - 1];
             p->element[p->currentsize - 1] = nullptr;
             p->currentsize--;
             num--;
