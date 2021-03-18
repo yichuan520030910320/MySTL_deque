@@ -5,7 +5,7 @@
 #define SPLITNUM 190
 using namespace std;
 #include "exceptions.hpp"
-
+#include <iostream>
 #include <cstddef>
 int cnt=0;
 namespace sjtu {
@@ -251,6 +251,9 @@ namespace sjtu {
                     return ans;
                 }
                 iterator temp(*this);
+//                if (temp.headblock== this->headdequeu->tail){
+//                    temp.po
+//                }
                 int nownum = headblock->currentsize;
                 int addnum = n;
                 if (pos - n >= 0) {
@@ -265,7 +268,7 @@ namespace sjtu {
                         frontnum -= p->currentsize;
                     }
                     if (p == headdequeu->head) {
-                        //throw invalid_iterator();
+                       throw invalid_iterator();
                     } else {
                         frontnum += p->currentsize;
                         temp.pos = p->currentsize - frontnum;
@@ -351,7 +354,7 @@ namespace sjtu {
              */
             iterator &operator++() {
                 //cout<< this->headdequeu->num<<"HHHHHH"<<endl;
-
+                if (headblock==headdequeu->tail)throw invalid_iterator();
                 *this=*this+1;
                 // cout<<this->headdequeu->num<<"&8888888888888888&&&"<<endl;
                 return *this;
@@ -363,6 +366,16 @@ namespace sjtu {
              */
             iterator operator--(int) {
                 iterator temp(*this);
+                iterator temp1(*this);
+                if (temp1.headdequeu->tail==temp1.headblock){
+                   temp1.headblock=temp1.headblock->pre;
+                    while (temp1.headblock->currentsize==0){
+                        temp1.headblock=temp1.headblock->pre;
+                    }
+                    temp1.pos=temp1.headblock->currentsize-1;
+                    *this=temp1;
+                    return temp;
+                }
                 *this = *this - 1;
                 return temp;
             }
@@ -380,6 +393,8 @@ namespace sjtu {
              * 		throw if iterator is invalid
              */
             T &operator*() const {
+                if (headblock==headdequeu->tail||headblock==headdequeu->head||pos<0||pos>headblock->currentsize-1) { throw invalid_iterator();
+                    }
                 return *(headblock->element[pos]);
 
             }
@@ -535,6 +550,7 @@ namespace sjtu {
          * TODO assignment operator
          */
         deque &operator=(const deque &other) {
+            //cout<<"*****"<<endl;
             if (this == &other) return *this;
             block *p = head->nxt;
             block *q;
@@ -547,14 +563,6 @@ namespace sjtu {
             }
             num = other.num;
             delete head, delete tail;
-
-
-
-
-
-
-
-
             num = other.num;
             head = new block;
             tail = new block;
@@ -563,6 +571,17 @@ namespace sjtu {
             block *cur=head;
             p=other.head;
             p=p->nxt;
+
+
+//
+//            block *p = head, *q = other.head->next;
+//            while (q != other.tail) {
+//                p->next = new Node(*q);
+//                p->next->prev = p;
+//                p = p->next;
+//                q = q->next;
+//            }
+
             while (p!=other.tail){
                 block *newq=new block(*p);
                 newq->pre=cur;
@@ -587,6 +606,7 @@ namespace sjtu {
 //            }
 //            p->nxt = q;
 //            q->pre = p;
+            return *this;
         }
 
         /**
@@ -594,6 +614,7 @@ namespace sjtu {
          * throw index_out_of_bound if out of bound.
          */
         T &at(const size_t &pos) {
+            if (pos<0||pos>=num) throw index_out_of_bound();
             int temppos = pos;
             block *p = head->nxt;
             while (p != tail) {
@@ -614,6 +635,7 @@ namespace sjtu {
         }
 
         const T &at(const size_t &pos) const {
+            if (pos<0||pos>=num) throw index_out_of_bound();
             int temppos = pos;
             block *p = head->nxt;
             while (p != tail) {
@@ -630,6 +652,7 @@ namespace sjtu {
 
         T &operator[](const size_t &pos) {
             //cout<<pos<<endl;
+            if (pos<0||pos>=num) throw index_out_of_bound();
             int temppos = pos;
 
             block *p = head->nxt;
@@ -653,6 +676,7 @@ namespace sjtu {
         }
 
         const T &operator[](const size_t &pos) const {
+            if (pos<0||pos>=num) throw index_out_of_bound();
             int temppos = pos;
             block *p = head->nxt;
             while (p != tail) {
@@ -744,7 +768,23 @@ namespace sjtu {
         /**
          * clears the contents
          */
-        void clear() {}
+        void clear() {
+
+            block *p = head->nxt;
+            block *q;
+            head->nxt = tail;
+            tail->pre = head;
+            while (p->nxt)
+            {
+                q=p->nxt;
+                delete p;
+                p=q;
+            }
+            num = 0;
+            delete head;
+            delete tail;
+
+        }
 
         /**
          * inserts elements at the specified locat on in the container.
@@ -853,6 +893,9 @@ namespace sjtu {
          * throw if the container is empty, the iterator is invalid or it points to a wrong place.
          */
         iterator erase(iterator pos) {
+//            if (pos.headblock->nxt==tail) {
+//                std::cout<<"&&&&"<<std::endl;
+//            }
             iterator temp;
 
             if (pos.headdequeu!= this||pos.headblock==tail||pos.headblock==head) throw invalid_iterator();
@@ -862,11 +905,23 @@ namespace sjtu {
 //                temp.headdequeu=this;
 //                return temp;}
             pos.headblock->erase(pos.pos);
+            if (pos.headblock->currentsize==0){
+                pos.headblock->pre->nxt=pos.headblock->nxt;
+                pos.headblock->nxt->pre=pos.headblock->pre;
+                temp.headblock=pos.headblock->nxt;
+                temp.pos=0;
+                temp.headdequeu= this;
+                delete pos.headblock;
+            }
+//            if (pos.headblock->nxt==tail) {
+//               std::cout<<"&&&&"<<std::endl;//todo
+//            }
             if (pos.pos==pos.headblock->currentsize){
                 temp.headdequeu= this;
                 temp.headblock=pos.headblock->nxt;
                 temp.pos=0;
-                //return temp;
+                num--;
+                return temp;
             }//todo
 
             temp.headdequeu=this;
