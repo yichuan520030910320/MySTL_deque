@@ -85,7 +85,6 @@ namespace sjtu {
                 }
                element[currentsize-1]= nullptr;
                 currentsize--;
-
             }
 
             block &operator=(const block &other) {
@@ -790,7 +789,7 @@ namespace sjtu {
                 split(pos.headblock);
                 if (pos.pos>pos.headblock->currentsize-1){
                     pos.headblock=pos.headblock->nxt;
-                    pos.pos=pos.pos-pos.headblock->currentsize;
+                    pos.pos=pos.pos-pos.headblock->currentsize-1;
                 }
                 //pos=begin()+num1;
             }
@@ -854,13 +853,29 @@ namespace sjtu {
          * throw if the container is empty, the iterator is invalid or it points to a wrong place.
          */
         iterator erase(iterator pos) {
-            if (pos.headdequeu!= this||pos.headblock==tail||pos.headblock==head) throw invalid_iterator();
-            pos.headblock->erase(pos.pos);
             iterator temp;
+
+            if (pos.headdequeu!= this||pos.headblock==tail||pos.headblock==head) throw invalid_iterator();
+//                        if (pos.headblock->nxt==tail&&pos.pos==pos.headblock->currentsize-1){
+//                temp.pos=0;
+//                temp.headblock=tail;
+//                temp.headdequeu=this;
+//                return temp;}
+            pos.headblock->erase(pos.pos);
+            if (pos.pos==pos.headblock->currentsize){
+                temp.headdequeu= this;
+                temp.headblock=pos.headblock->nxt;
+                temp.pos=0;
+                //return temp;
+            }//todo
+
             temp.headdequeu=this;
             temp.headblock=pos.headblock;
             temp.pos=pos.pos;
             num--;
+
+            //if (++temp==end()){return end();}
+           // temp=temp+1;
             return  temp;
         }
 
