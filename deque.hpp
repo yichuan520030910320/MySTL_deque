@@ -394,7 +394,7 @@ namespace sjtu {
              * 		throw if iterator is invalid
              */
             T &operator*() const {
-                if (headblock==headdequeu->tail||headblock==headdequeu->head||pos<0||pos>headblock->currentsize-1) { throw invalid_iterator();}
+                if (headblock==headdequeu->tail||headblock==headdequeu->head||pos<0||((pos>headblock->currentsize-1))) { throw invalid_iterator();}
                 return *(headblock->element[pos]);
 
             }
@@ -593,7 +593,7 @@ namespace sjtu {
                     }
                     if (p == nullptr) {
                         p = headblock->nxt;
-                        dis = p->currentsize - pos;
+                        dis = headblock->currentsize - pos;
                         while (p != nullptr) {
 
                             if (p == rhs.headblock) {
@@ -845,6 +845,7 @@ namespace sjtu {
 
 
 clear();
+delete head,delete tail;
 block *p;
             num = other.num;
             head = new block;
@@ -1275,6 +1276,12 @@ block *p;
             delete   p->element[p->currentsize - 1];
             p->element[p->currentsize - 1] = nullptr;
             p->currentsize--;
+            if (p->currentsize==0){
+                p->nxt->pre=p->pre;
+                p->pre->nxt=p->nxt;
+                delete p;
+
+            }
             num--;
         }
 
@@ -1313,8 +1320,15 @@ block *p;
                 if (p->currentsize != 0) break;
                 p = p->nxt;
             }
-            p->erase(0);
-            num--;
+            p->erase(0); num--;
+            if (p->currentsize==0){
+                p->nxt->pre=p->pre;
+                p->pre->nxt=p->nxt;
+                delete p;
+
+            }
+
+
         }
     };
 
