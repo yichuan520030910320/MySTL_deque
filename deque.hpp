@@ -282,6 +282,7 @@ namespace sjtu {
             // return th distance between two iterator,
             // if these two iterators points to different vectors, throw invaild_iterator.
             int operator-(const iterator &rhs) const {//todo is draft
+                //cout<<"******"<<endl;
                 if (headdequeu != rhs.headdequeu) {
                     //cout<<"fffffffffffuuuuuuck"<<endl;
                     throw invalid_iterator();
@@ -305,7 +306,7 @@ namespace sjtu {
                     }
                     if (p == nullptr) {
                         p = headblock->nxt;
-                        dis = p->currentsize - pos;
+                        dis = headblock->currentsize - pos;
                         while (p != nullptr) {
 
                             if (p == rhs.headblock) {
@@ -393,8 +394,7 @@ namespace sjtu {
              * 		throw if iterator is invalid
              */
             T &operator*() const {
-                if (headblock==headdequeu->tail||headblock==headdequeu->head||pos<0||pos>headblock->currentsize-1) { throw invalid_iterator();
-                    }
+                if (headblock==headdequeu->tail||headblock==headdequeu->head||pos<0||pos>headblock->currentsize-1) { throw invalid_iterator();}
                 return *(headblock->element[pos]);
 
             }
@@ -438,23 +438,300 @@ namespace sjtu {
             // it should has similar member method as iterator.
             //  and it should be able to construct from an iterator.
         private:
+           const deque *headdequeu;
+            block *headblock;
+            int pos;
             // data members.
         public:
-            const_iterator() {
-                // TODO
-            }
+//            const_iterator() {
+//                // TODO
+//            }
+//
+//            const_iterator(const const_iterator &other) {
+//                // TODO
+//            }
+//
+//            const_iterator(const iterator &other) {
+//                // TODO
+//            }
+
+            const_iterator(block*headblock= nullptr,const deque *headdequeu= nullptr, int temp=0):headdequeu(headdequeu),headblock(headblock),pos(temp) { }
 
             const_iterator(const const_iterator &other) {
-                // TODO
+                headdequeu = other.headdequeu;
+                headblock = other.headblock;
+                pos = other.pos;
             }
 
-            const_iterator(const iterator &other) {
-                // TODO
+            const_iterator &operator=(const const_iterator &other) {
+                // cout<<other.headdequeu->num<<"*******999999*"<<endl;
+                if (this == &other) {
+                    //   cout<<"  wrong in  operator="<<endl;
+                    return *this; }
+//memory leak may exist
+                // maybeneed clear something//todo
+                // cout<<other.headdequeu->num<<"*******999999*"<<endl;
+                //  headdequeu= nullptr,headblock= nullptr;
+                //cout<<other.headdequeu->num<<"*******999999*"<<endl;
+                //cout<<other.headdequeu->num<<"&&&"<<endl;
+                // cout<<other.headblock->currentsize<<"&&&"<<endl;
+                //cout<<other.headdequeu->num<<"*******999999*"<<endl;
+                // other.headdequeu->debug();
+                // if (other.headdequeu==NULL) cout<<"^^^"<<endl;
+                headdequeu =other.headdequeu;
+                headblock = other.headblock;
+                pos = other.pos;
+                // if (headdequeu!=other.headdequeu){cout<<"^^^^^&&&&&"<<endl;}
+                return *this;
+            }
+
+            /**
+             * return a new iterator which pointer n-next elements
+             *   if there are not enough elements, iterator becomes invalid
+             * as well as operator-
+             */
+            const_iterator operator+(const int &n) const {
+                // cout<<n<<"&&&"<<endl;
+                if (n<0) {
+                    const_iterator ans(*this);
+                    ans=ans-(-n);
+                    return ans;
+                }
+                const_iterator temp(*this);
+                int nownum = headblock->currentsize;
+                // cout<<nownum<<"   "<<temp.pos<<"  "
+                // cout<<pos<<"&&&"<<endl;
+                // if (headblock==)
+                // if (headblock==)
+                // cout<<temp.headdequeu->num<<"^^^^^"<<endl;
+                // cout<<temp.headblock->currentsize<<"  num in iter+"<<endl;
+                //cout<<nownum<<"  num in + iter "<<endl;
+                int addnum = n;
+                block *p = headblock;
+                // cout<<this->headblock->nxt->currentsize<<"********"<<endl;
+                addnum -= (nownum - pos);//todo with edge
+                //cout<<nownum<<"   "<<temp.pos<<"  "<<addnum<<endl;
+                while (addnum >= 0 && p->nxt != nullptr) {
+                    p = p->nxt;
+                    addnum -= p->currentsize;
+                }
+                if (p == headblock) {
+                    //cout<<"***"<<endl;
+                    temp.pos += n;
+                    //cout<<temp.pos<<"***"<<endl;
+                }
+                else if (p == headdequeu->tail) {
+                    temp.pos=0;
+                    temp.headblock=headdequeu->tail;
+                    //throw invalid_iterator();//todo may have trouble
+                } else {
+                    addnum += p->currentsize;
+                    temp.headblock = p;
+                    temp.pos = addnum;
+                }
+                return temp;
+            }
+
+            const_iterator operator-(const int &n) const {
+                if (n<0) {
+                    const_iterator ans(*this);
+                    ans=ans+(-n);
+                    return ans;
+                }
+                const_iterator temp(*this);
+//                if (temp.headblock== this->headdequeu->tail){
+//                    temp.po
+//                }
+                int nownum = headblock->currentsize;
+                int addnum = n;
+                if (pos - n >= 0) {
+                    temp.pos -= n;
+                } else {
+                    block *p = headblock;
+                    int temppos = temp.pos;
+                    int frontnum = n;
+                    frontnum -= (temppos);//todo
+                    while (frontnum > 0 && p != headdequeu->head) {
+                        p = p->pre;
+                        frontnum -= p->currentsize;
+                    }
+                    if (p == headdequeu->head) {
+                        throw invalid_iterator();
+                    } else {
+                        frontnum += p->currentsize;
+                        temp.pos = p->currentsize - frontnum;
+                        temp.headblock=p;
+                    }
+                }
+                return temp;
+                //TODO
+            }
+
+            // return th distance between two iterator,
+            // if these two iterators points to different vectors, throw invaild_iterator.
+            int operator-(const const_iterator &rhs) const {//todo is draft
+                if (headdequeu != rhs.headdequeu) {
+                    //cout<<"fffffffffffuuuuuuck"<<endl;
+                    throw invalid_iterator();
+                }
+                if (headblock == rhs.headblock) {
+                    return pos - rhs.pos;
+                } else {
+                    int dis = 0;
+                    block *p = rhs.headblock->nxt;
+                    dis = rhs.headblock->currentsize - rhs.pos;
+                    while (p != nullptr) {
+                        if (p == headblock) {
+                            //cout<<"****"<<endl;
+                            dis += pos ;
+                            //cout<<dis<<"&&&"<<endl;
+                            break;//todo
+
+                        }
+                        dis += p->currentsize;
+                        p = p->nxt;
+                    }
+                    if (p == nullptr) {
+                        p = headblock->nxt;
+                        dis = p->currentsize - pos;
+                        while (p != nullptr) {
+
+                            if (p == rhs.headblock) {
+                                dis += rhs.pos ;
+                                break;
+                            }
+                            dis += p->currentsize;p = p->nxt;
+                        }
+                    } else return dis;
+                    if (p == nullptr) {
+                        //cout<<"ffffffffffffffffffffffuckk"<<endl;
+                        throw invalid_iterator(); }
+                    else {
+                        return -(dis);
+                    }
+
+
+                }
+
+                //TODO
+            }
+
+            const_iterator &operator+=(const int &n) {
+                *this=*this+n;
+                return *this;
+                //TODO
+            }
+
+            const_iterator &operator-=(const int &n) {
+                *this=*this-n;
+                return *this;
+            }
+
+            /**
+             * TODO iter++
+             */
+            const_iterator operator++(int) {//modify it!!!!
+                const_iterator temp(*this);
+                *this = *this + 1;
+                return temp;
+
+            }
+
+            /**
+             * TODO ++iter
+             */
+            const_iterator &operator++() {
+                //cout<< this->headdequeu->num<<"HHHHHH"<<endl;
+                if (headblock==headdequeu->tail)throw invalid_iterator();
+                *this=*this+1;
+                // cout<<this->headdequeu->num<<"&8888888888888888&&&"<<endl;
+                return *this;
+                //todo
+            }
+
+            /**
+             * TODO iter--
+             */
+            const_iterator operator--(int) {
+                const_iterator temp(*this);
+                const_iterator temp1(*this);
+                if (temp1.headdequeu->tail==temp1.headblock){
+                    temp1.headblock=temp1.headblock->pre;
+                    while (temp1.headblock->currentsize==0){
+                        temp1.headblock=temp1.headblock->pre;
+                    }
+                    temp1.pos=temp1.headblock->currentsize-1;
+                    *this=temp1;
+                    return temp;
+                }
+                *this = *this - 1;
+                return temp;
+            }
+
+            /**
+             * TODO --iter
+             */
+            const_iterator &operator--() {
+                *this=*this-1;
+                return *this;
+            }
+
+            /**
+             * TODO *it
+             * 		throw if iterator is invalid
+             */
+            T &operator*() const {
+                if (headblock==headdequeu->tail||headblock==headdequeu->head||pos<0||pos>headblock->currentsize-1) { throw invalid_iterator();
+                }
+                return *(headblock->element[pos]);
+
+            }
+
+            /**
+             * TODO it->field
+             * 		throw if iterator is invalid
+             */
+            T *operator->() const noexcept {
+                return (headblock->element[pos]);
+            }
+
+            /**
+             * a operator to check whether two iterators are same (pointing to the same memory).
+             */
+            bool operator==(const iterator &rhs) const {
+                return  (headdequeu==rhs.headdequeu&&headblock==rhs.headblock&&pos==rhs.pos);
+
+            }
+
+            bool operator==(const const_iterator &rhs) const {
+                return  (headdequeu==rhs.headdequeu&&headblock==rhs.headblock&&pos==rhs.pos);
+            }
+
+            /**
+             * some other operator for iterator.
+             */
+            bool operator!=(const iterator &rhs) const {
+                return  !(headdequeu==rhs.headdequeu&&headblock==rhs.headblock&&pos==rhs.pos);
+            }
+
+            bool operator!=(const const_iterator &rhs) const {
+                return  !(headdequeu==rhs.headdequeu&&headblock==rhs.headblock&&pos==rhs.pos);
             }
             // And other methods in iterator.
             // And other methods in iterator.
             // And other methods in iterator.
         };
+
+
+
+
+
+
+
+
+
+
+
 
         /**
          * TODO Constructors
@@ -551,23 +828,33 @@ namespace sjtu {
          */
         deque &operator=(const deque &other) {
             //cout<<"*****"<<endl;
+          // delete other.head;
             if (this == &other) return *this;
-            block *p = head->nxt;
-            block *q;
-            head->nxt = tail;
-            tail->pre = head;
-            while (p != tail) {
-                q = p;
-                delete q;
-                p = p->nxt;
-            }
-            num = other.num;
-            delete head, delete tail;
+//            block *p = head->nxt;
+//            block *q;
+//            head->nxt = tail;
+//            tail->pre = head;
+//            while (p != tail) {
+//                q = p;
+//                delete q;
+//                p = p->nxt;
+//            }
+//            num = other.num;
+//            delete this->head, delete this->tail;
+//            head= nullptr,tail= nullptr;
+
+
+clear();
+block *p;
             num = other.num;
             head = new block;
             tail = new block;
+
             head->nxt=tail;
             tail->pre=head;
+//            if (other.head->nxt==other.tail){
+//                return  *this;
+//            }
             block *cur=head;
             p=other.head;
             p=p->nxt;
@@ -591,6 +878,11 @@ namespace sjtu {
             }
             tail->pre=cur;
             cur->nxt=tail;
+
+
+
+
+
 //            head = new block(*other.head);
 //            tail = new block;
 //            p = head;
@@ -725,11 +1017,7 @@ namespace sjtu {
 
         const_iterator cbegin() const {
             if (num==0) return cend();
-            const_iterator temp;
-            temp.headqueu=this;
-            temp.headblock=head->nxt;
-            temp.pos=0;
-            return temp;
+            return  const_iterator(head->nxt, this,0);
         }
 
         /**
@@ -744,11 +1032,7 @@ namespace sjtu {
         }
 
         const_iterator cend() const {
-            const_iterator temp;
-            temp.pos=0;
-            temp.headblock=tail;
-            temp.headdequeu= this;
-            return temp;
+            return  const_iterator(tail, this,0);
         }
 
         /**
@@ -781,8 +1065,12 @@ namespace sjtu {
                 p=q;
             }
             num = 0;
-            delete head;
-            delete tail;
+           // delete head;
+            //delete tail;
+           // head= nullptr;
+            //tail= nullptr;
+//            head=new block;
+//            tail=new block;
 
         }
 
@@ -912,6 +1200,8 @@ namespace sjtu {
                 temp.pos=0;
                 temp.headdequeu= this;
                 delete pos.headblock;
+                num--;
+                return temp;
             }
 //            if (pos.headblock->nxt==tail) {
 //               std::cout<<"&&&&"<<std::endl;//todo
